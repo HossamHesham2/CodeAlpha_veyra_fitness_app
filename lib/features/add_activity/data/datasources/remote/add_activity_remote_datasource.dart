@@ -1,0 +1,5 @@
+import 'package:veyra/features/add_activity/data/models/activity_model.dart';
+
+abstract class AddActivityRemoteDatasource {
+  Future<void> addActivity({required ActivityModel activityModel});
+}

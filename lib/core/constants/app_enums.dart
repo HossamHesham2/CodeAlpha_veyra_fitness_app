@@ -1,0 +1,22 @@
+enum AppRequests { initial, loading, success, error }
+enum ExerciseType {
+  running,
+  walking,
+  cycling,
+  swimming,
+  jumpRope,
+  hiking,
+  strengthTraining,
+  weightlifting,
+  bodybuilding,
+  crossFit,
+  yoga,
+  pilates,
+  stretching,
+  mobility,
+  football,
+  basketball,
+  tennis,
+  boxing,
+  other,
+}
