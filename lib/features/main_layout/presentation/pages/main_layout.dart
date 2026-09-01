@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:flutter_svg/svg.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:veyra/core/constants/app_assets.dart';
 import 'package:veyra/core/di/injection.dart';
 import 'package:veyra/core/router/route_names.dart';
-import 'package:veyra/core/theme/app_colors.dart';
 import 'package:veyra/core/widgets/d_scaffold.dart';
 import 'package:veyra/features/home/presentation/bloc/home_bloc.dart';
 import 'package:veyra/features/home/presentation/bloc/home_event.dart';
@@ -29,23 +28,17 @@ class MainLayout extends StatelessWidget {
       child: Builder(
         builder: (context) {
           return DScaffold(
-            extendBody: true,
-            floatingActionButton: _FitnessFab(
-              cs: cs,
-              onTap: () async {
-                final result = await context.push<bool>(RouteNames.addActivity);
-                if (result == true && context.mounted) {
-                  print('REFRESH HOME');
-
-                  context.read<HomeBloc>().add(GetActivitiesEvent());
-                }
-              },
-            ),
-            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-            bottomNavigationBar: _FloatingNavBar(
+            bottomNavigationBar: _BottomNavBar(
               currentIndex: navigationShell.currentIndex,
               onDestinationSelected: _onDestinationSelected,
               cs: cs,
+              onFabTap: () async {
+                final result = await context.push<bool>(RouteNames.addActivity);
+
+                if (result == true && context.mounted) {
+                  context.read<HomeBloc>().add(GetActivitiesEvent());
+                }
+              },
             ),
             body: navigationShell,
           );
@@ -55,54 +48,24 @@ class MainLayout extends StatelessWidget {
   }
 }
 
-class _FitnessFab extends StatelessWidget {
-  final ColorScheme cs;
-  final VoidCallback onTap;
-
-  const _FitnessFab({required this.cs, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: EdgeInsets.all(16.r),
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [cs.primary, cs.inversePrimary, cs.primary],
-          ),
-
-          border: Border.all(color: AppColors.lightSurface.withValues(alpha: 0.25), width: 2),
-        ),
-        child: SvgPicture.asset(
-          AppSvgs.add,
-          width: 30,
-          colorFilter: ColorFilter.mode(AppColors.lightSurface, BlendMode.srcIn),
-        ),
-      ),
-    );
-  }
-}
-
-class _FloatingNavBar extends StatelessWidget {
+class _BottomNavBar extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onDestinationSelected;
   final ColorScheme cs;
+  final VoidCallback onFabTap;
 
-  const _FloatingNavBar({
+  const _BottomNavBar({
     required this.currentIndex,
     required this.onDestinationSelected,
     required this.cs,
+    required this.onFabTap,
   });
 
   static const _items = [
-    (icon: Icons.home_outlined, selectedIcon: Icons.home, label: 'Home'),
-    (icon: Icons.history_outlined, selectedIcon: Icons.history, label: 'History'),
-    (icon: Icons.analytics_outlined, selectedIcon: Icons.analytics, label: 'Stats'),
-    (icon: Icons.person_outline, selectedIcon: Icons.person, label: 'Profile'),
+    (icon: Icons.home_rounded, label: 'Home'),
+    (icon: Icons.history_rounded, label: 'History'),
+    (icon: Icons.analytics_rounded, label: 'Stats'),
+    (icon: Icons.person_rounded, label: 'Profile'),
   ];
 
   @override
@@ -110,35 +73,107 @@ class _FloatingNavBar extends StatelessWidget {
     return Padding(
       padding: EdgeInsets.fromLTRB(16.w, 0, 16.w, 16.h),
       child: Container(
-        height: 65.h,
-        padding: EdgeInsets.symmetric(horizontal: 16.w),
+        height: 70.h,
         decoration: BoxDecoration(
           color: cs.surface,
-          borderRadius: BorderRadius.circular(28.r),
+          borderRadius: BorderRadius.circular(20.r),
           boxShadow: [
             BoxShadow(
               color: cs.onSurface.withValues(alpha: 0.08),
-              blurRadius: 34.r,
-              offset: Offset(0, 8.h),
+              blurRadius: 20.r,
+              offset: Offset(0, 4.h),
             ),
           ],
         ),
         child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: List.generate(_items.length, (index) {
-            final item = _items[index];
+          children: [
+            Expanded(
+              child: _NavItem(
+                icon: _items[0].icon,
+                label: _items[0].label,
+                isSelected: currentIndex == 0,
+                cs: cs,
+                onTap: () => onDestinationSelected(0),
+              ),
+            ),
 
-            final isSelected = currentIndex == index;
+            Expanded(
+              child: _NavItem(
+                icon: _items[1].icon,
+                label: _items[1].label,
+                isSelected: currentIndex == 1,
+                cs: cs,
+                onTap: () => onDestinationSelected(1),
+              ),
+            ),
 
-            return _NavItem(
-              icon: item.icon,
-              selectedIcon: item.selectedIcon,
-              label: item.label,
-              isSelected: isSelected,
-              cs: cs,
-              onTap: () => onDestinationSelected(index),
-            );
-          }),
+            Expanded(
+              child: _CenterFab(cs: cs, onTap: onFabTap),
+            ),
+
+            Expanded(
+              child: _NavItem(
+                icon: _items[2].icon,
+                label: _items[2].label,
+                isSelected: currentIndex == 2,
+                cs: cs,
+                onTap: () => onDestinationSelected(2),
+              ),
+            ),
+
+            Expanded(
+              child: _NavItem(
+                icon: _items[3].icon,
+                label: _items[3].label,
+                isSelected: currentIndex == 3,
+                cs: cs,
+                onTap: () => onDestinationSelected(3),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _CenterFab extends StatelessWidget {
+  final ColorScheme cs;
+  final VoidCallback onTap;
+
+  const _CenterFab({required this.cs, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: GestureDetector(
+        onTap: onTap,
+        child: Container(
+          width: 48.r,
+          height: 48.r,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [cs.primary, cs.inversePrimary],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: cs.primary.withValues(alpha: 0.25),
+                blurRadius: 10.r,
+                offset: Offset(0, 4.h),
+              ),
+            ],
+          ),
+          child: Center(
+            child: SvgPicture.asset(
+              AppSvgs.add,
+              width: 22.r,
+              height: 22.r,
+              colorFilter: ColorFilter.mode(cs.onPrimary, BlendMode.srcIn),
+            ),
+          ),
         ),
       ),
     );
@@ -147,7 +182,6 @@ class _FloatingNavBar extends StatelessWidget {
 
 class _NavItem extends StatelessWidget {
   final IconData icon;
-  final IconData selectedIcon;
   final String label;
   final bool isSelected;
   final ColorScheme cs;
@@ -155,7 +189,6 @@ class _NavItem extends StatelessWidget {
 
   const _NavItem({
     required this.icon,
-    required this.selectedIcon,
     required this.label,
     required this.isSelected,
     required this.cs,
@@ -164,40 +197,26 @@ class _NavItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final color = isSelected ? cs.primary : cs.onSurface.withValues(alpha: 0.45);
+
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 250),
-        curve: Curves.easeOut,
-        padding: EdgeInsets.symmetric(horizontal: isSelected ? 14.w : 10.w, vertical: 8.h),
-        decoration: BoxDecoration(
-          color: isSelected ? cs.primary.withValues(alpha: 0.12) : Colors.transparent,
-          borderRadius: BorderRadius.circular(18.r),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              isSelected ? selectedIcon : icon,
-              size: 22.r,
-              color: isSelected ? cs.primary : cs.onSurface.withValues(alpha: 0.45),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 23.r, color: color),
+          SizedBox(height: 3.h),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 11.sp,
+              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+              color: color,
             ),
-            AnimatedSize(
-              duration: const Duration(milliseconds: 250),
-              child: isSelected
-                  ? Padding(
-                      padding: EdgeInsets.only(left: 6.w),
-                      child: Text(
-                        label,
-                        style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(fontWeight: FontWeight.w600, color: cs.primary),
-                      ),
-                    )
-                  : const SizedBox.shrink(),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

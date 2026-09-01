@@ -3,7 +3,7 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:veyra/core/extensions/color_schema_extension.dart';
 import 'package:veyra/core/utils/app_spacing.dart';
 
-class RecentActivityItem extends StatelessWidget {
+class ActivityItem extends StatelessWidget {
   final Color color;
   final IconData icon;
   final String title;
@@ -11,7 +11,7 @@ class RecentActivityItem extends StatelessWidget {
   final String calories;
   final String time;
 
-  const RecentActivityItem({
+  const ActivityItem({
     super.key,
     required this.color,
     required this.icon,

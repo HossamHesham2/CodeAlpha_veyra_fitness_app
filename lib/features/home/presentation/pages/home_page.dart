@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart' show DateFormat;
 import 'package:veyra/core/constants/app_enums.dart';
 import 'package:veyra/core/di/injection.dart';
 import 'package:veyra/core/extensions/exercise_type_extension.dart';
+import 'package:veyra/core/router/route_names.dart';
 import 'package:veyra/core/theme/app_colors.dart';
 import 'package:veyra/core/utils/app_spacing.dart';
 import 'package:veyra/core/widgets/d_scaffold.dart';
@@ -12,7 +14,7 @@ import 'package:veyra/features/home/presentation/bloc/home_event.dart';
 import 'package:veyra/features/home/presentation/bloc/home_state.dart';
 import 'package:veyra/features/home/presentation/widgets/fitness_progress_widget.dart';
 import 'package:veyra/features/home/presentation/widgets/home_header.dart';
-import 'package:veyra/features/home/presentation/widgets/recent_activity_item.dart';
+import 'package:veyra/core/widgets/activity_item.dart';
 import 'package:veyra/features/home/presentation/widgets/summary_item.dart';
 
 class HomePage extends StatelessWidget {
@@ -46,11 +48,10 @@ class HomePage extends StatelessWidget {
           (sum, activity) => sum + (int.tryParse(activity.duration ?? '0') ?? 0),
         );
         final stepsGoal = 10000;
-        final workoutGoal  = 60;
+        final workoutGoal = 60;
 
         final stepsProgress = (todaySteps / stepsGoal).clamp(0.0, 1.0);
-        final workoutProgress =
-        (todayWorkoutMinutes / workoutGoal).clamp(0.0, 1.0);
+        final workoutProgress = (todayWorkoutMinutes / workoutGoal).clamp(0.0, 1.0);
         return DScaffold(
           body: SingleChildScrollView(
             child: Column(
@@ -107,7 +108,9 @@ class HomePage extends StatelessWidget {
                   children: [
                     Text("Recent Activities", style: text.titleMedium),
                     TextButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        context.go(RouteNames.history);
+                      },
                       child: Text("View All", style: text.labelMedium?.copyWith(color: cs.primary)),
                     ),
                   ],
@@ -186,7 +189,7 @@ class HomePage extends StatelessWidget {
                       }
                     }
 
-                    return RecentActivityItem(
+                    return ActivityItem(
                       color: AppColors.steps,
                       icon: iconData(),
                       title: capitalize(activity.exerciseType ?? ""),
@@ -197,7 +200,6 @@ class HomePage extends StatelessWidget {
                     );
                   }).toList(),
 
-                SizedBox(height: AppSpacing.gap48),
               ],
             ),
           ),
