@@ -16,6 +16,8 @@ import 'package:veyra/features/add_activity/presentation/bloc/add_activity_state
 import 'package:veyra/features/add_activity/presentation/widgets/exercise_type_dropdown.dart';
 import 'package:veyra/features/add_activity/presentation/widgets/intensity_selector.dart';
 import 'package:veyra/features/add_activity/presentation/widgets/labeled_text_field.dart';
+import 'package:veyra/features/home/presentation/bloc/home_bloc.dart';
+import 'package:veyra/features/home/presentation/bloc/home_event.dart';
 
 class AddActivityPage extends StatefulWidget {
   const AddActivityPage({super.key});
@@ -50,6 +52,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
     if (date != null) {
       setState(() {
         selectedDate = date;
+        dateController.text = DateFormat('dd MMM, yyyy').format(selectedDate);
       });
     }
   }
@@ -63,6 +66,12 @@ class _AddActivityPageState extends State<AddActivityPage> {
         timeController.text = time.format(context);
       });
     }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    dateController.text = DateFormat('dd MMM, yyyy').format(selectedDate);
   }
 
   @override
@@ -88,35 +97,36 @@ class _AddActivityPageState extends State<AddActivityPage> {
             setState(() {
               isLoading = true;
             });
-          }
-          if (state.addActivityRequest == AppRequests.error) {
+          } else if (state.addActivityRequest == AppRequests.error) {
             setState(() {
               isLoading = false;
             });
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 backgroundColor: Theme.of(context).colorScheme.error,
                 content: Text(
-                  state.addActivityFailure?.errorMessage ?? "Something wrong !",
+                  state.addActivityFailure?.errorMessage ?? "Something went wrong!",
                   style: text.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onError),
                 ),
               ),
             );
-          }
-          if (state.addActivityRequest == AppRequests.success) {
+          } else if (state.addActivityRequest == AppRequests.success) {
             setState(() {
               isLoading = false;
             });
+
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 backgroundColor: Theme.of(context).colorScheme.success,
                 content: Text(
-                  "Activity Add Successfully",
+                  "Activity Added Successfully",
                   style: text.bodyLarge?.copyWith(color: Theme.of(context).colorScheme.onSuccess),
                 ),
               ),
             );
-            context.pop();
+
+            context.pop(true);
           }
         },
         builder: (context, state) => DScaffold(
@@ -210,8 +220,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
 
                   LabeledTextField(
                     label: "Date",
-                    controller: dateController
-                      ..text = DateFormat('dd MMM, yyyy').format(selectedDate),
+                    controller: dateController,
                     hintText: "Enter Date ",
                     keyboardType: TextInputType.datetime,
                     readOnly: true,
@@ -267,7 +276,7 @@ class _AddActivityPageState extends State<AddActivityPage> {
                           duration: durationController.text.trim(),
                           caloriesBurned: caloriesController.text.trim(),
                           steps: stepsController.text.trim(),
-                          date: DateFormat('dd MMM, yyy').format(selectedDate).toString(),
+                          date: DateFormat('dd MMM, yyyy').format(selectedDate).toString(),
                           time: MaterialLocalizations.of(context)
                               .formatTimeOfDay(selectedTime, alwaysUse24HourFormat: false),
                           intensity: selectedIntensity,

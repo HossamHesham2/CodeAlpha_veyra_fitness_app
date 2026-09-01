@@ -1,6 +1,8 @@
 class AppConstants {
   AppConstants._();
   static const appName = 'Veyra';
-  static const isLoggedIn  = 'isLoggedIn ';
-  static const isViewed  = 'isViewed ';
+  static const isLoggedIn  = 'isLoggedIn';
+  static const isViewed  = 'isViewed';
+  static const usersCollection  = 'users';
+  static const activitiesCollection  = 'activities';
 }

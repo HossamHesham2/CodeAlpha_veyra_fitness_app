@@ -14,6 +14,12 @@ import 'package:veyra/features/auth/domain/repositories/auth_repository.dart';
 import 'package:veyra/features/auth/domain/usecases/sign_in_use_case.dart';
 import 'package:veyra/features/auth/domain/usecases/sign_up_use_case.dart';
 import 'package:veyra/features/auth/presentation/bloc/auth_bloc.dart';
+import 'package:veyra/features/home/data/datasources/remote/home_remote_datasource.dart';
+import 'package:veyra/features/home/data/datasources/remote/home_remote_datasource_impl.dart';
+import 'package:veyra/features/home/data/repositories/home_repository_impl.dart';
+import 'package:veyra/features/home/domain/repositories/home_repository.dart';
+import 'package:veyra/features/home/domain/usecases/get_activities_use_case.dart';
+import 'package:veyra/features/home/presentation/bloc/home_bloc.dart';
 
 final getIt = GetIt.instance;
 
@@ -33,12 +39,21 @@ Future<void> configureDependency() async {
       firestore: getIt<FirebaseFirestore>(),
     ),
   );
+  getIt.registerLazySingleton<HomeRemoteDatasource>(
+    () => HomeRemoteDatasourceImpl(
+      firebaseAuth: getIt<FirebaseAuth>(),
+      firestore: getIt<FirebaseFirestore>(),
+    ),
+  );
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authRemoteDatasource: getIt<AuthRemoteDatasource>()),
   );
   getIt.registerLazySingleton<AddActivityRepository>(
     () => AddActivityRepositoryImpl(activityRemoteDatasource: getIt<AddActivityRemoteDatasource>()),
+  );
+  getIt.registerLazySingleton<HomeRepository>(
+    () => HomeRepositoryImpl(homeRemoteDatasource: getIt<HomeRemoteDatasource>()),
   );
   // UseCases
   getIt.registerLazySingleton<SignInUseCase>(
@@ -50,11 +65,17 @@ Future<void> configureDependency() async {
   getIt.registerLazySingleton<AddActivityUseCase>(
     () => AddActivityUseCase(addActivityRepository: getIt<AddActivityRepository>()),
   );
+  getIt.registerLazySingleton<GetActivitiesUseCase>(
+    () => GetActivitiesUseCase(homeRepository: getIt<HomeRepository>()),
+  );
   // State Management
   getIt.registerFactory<AuthBloc>(
     () => AuthBloc(signInUseCase: getIt<SignInUseCase>(), signUpUseCase: getIt<SignUpUseCase>()),
   );
   getIt.registerFactory<AddActivityBloc>(
     () => AddActivityBloc(addActivityUseCase: getIt<AddActivityUseCase>()),
+  );
+  getIt.registerFactory<HomeBloc>(
+    () => HomeBloc(getActivitiesUseCase: getIt<GetActivitiesUseCase>()),
   );
 }

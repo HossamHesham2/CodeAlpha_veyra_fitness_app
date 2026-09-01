@@ -1,3 +1,6 @@
-abstract class HomeRemoteDatasource {}
+import 'package:veyra/features/add_activity/data/models/activity_model.dart';
 
-class HomeRemoteDatasourceImpl extends HomeRemoteDatasource {}
+abstract class HomeRemoteDatasource {
+  Future<List<ActivityModel>> getActivities();
+}
+

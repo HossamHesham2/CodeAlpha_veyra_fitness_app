@@ -9,14 +9,16 @@ import 'package:veyra/core/utils/app_spacing.dart';
 class FitnessProgressWidget extends StatelessWidget {
   const FitnessProgressWidget({
     super.key,
-    this.progress = 0.74,
+    this.stepsProgress = 0.74,
+    this.workoutProgress = 0.74,
     this.steps = 7460,
     this.stepsGoal = 10000,
     this.calories = 920,
     this.workoutMinutes = 45,
   });
 
-  final double progress;
+  final double stepsProgress;
+  final double workoutProgress;
   final int steps;
   final int stepsGoal;
   final int calories;
@@ -27,7 +29,13 @@ class FitnessProgressWidget extends StatelessWidget {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Expanded(flex: 5, child: _ProgressCircle(progress: progress)),
+        Expanded(
+          flex: 5,
+          child: _ProgressCircle(
+            stepsProgress: stepsProgress,
+            workoutProgress: workoutProgress,
+          ),
+        ),
 
         const SizedBox(width: 16),
 
@@ -73,15 +81,22 @@ class FitnessProgressWidget extends StatelessWidget {
     );
   }
 }
-
 class _ProgressCircle extends StatelessWidget {
-  const _ProgressCircle({required this.progress});
+  const _ProgressCircle({
+    required this.stepsProgress,
+    required this.workoutProgress,
+  });
 
-  final double progress;
+  final double stepsProgress;
+  final double workoutProgress;
 
   @override
   Widget build(BuildContext context) {
-    final percentage = (progress * 100).round();
+    final overallProgress =
+    ((stepsProgress + workoutProgress) / 2).clamp(0.0, 1.0);
+
+    final percentage = (overallProgress * 100).round();
+
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -93,7 +108,11 @@ class _ProgressCircle extends StatelessWidget {
         children: [
           CustomPaint(
             size: const Size.square(280),
-            painter: _ProgressPainter(progress: progress, isDark: isDark),
+            painter: _ProgressPainter(
+              stepsProgress: stepsProgress,
+              workoutProgress: workoutProgress,
+              isDark: isDark,
+            ),
           ),
 
           Column(
@@ -101,7 +120,10 @@ class _ProgressCircle extends StatelessWidget {
             children: [
               Text(
                 'Daily Goal',
-                style: text.labelLarge?.copyWith(color: cs.onSurface, fontWeight: FontWeight.w500),
+                style: text.labelLarge?.copyWith(
+                  color: cs.onSurface,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
 
               SizedBox(height: AppSpacing.gap4),
@@ -132,57 +154,82 @@ class _ProgressCircle extends StatelessWidget {
 }
 
 class _ProgressPainter extends CustomPainter {
-  const _ProgressPainter({required this.progress, required this.isDark});
+  const _ProgressPainter({
+    required this.stepsProgress,
+    required this.workoutProgress,
+    required this.isDark,
+  });
 
-  final double progress;
+  final double stepsProgress;
+  final double workoutProgress;
   final bool isDark;
 
   @override
   void paint(Canvas canvas, Size size) {
     final center = Offset(size.width / 2, size.height / 2);
-
     final radius = math.min(size.width, size.height) / 2 - 10;
+    final rect = Rect.fromCircle(center: center, radius: radius);
+
+    const strokeWidth = 12.0;
 
     // Background track
     final trackPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..color = isDark ? AppColors.darkNavy : AppColors.lightNavy;
 
     canvas.drawCircle(center, radius, trackPaint);
 
-    final rect = Rect.fromCircle(center: center, radius: radius);
+    // Prevent invalid values
+    final steps = stepsProgress.clamp(0.0, 1.0);
+    final workout = workoutProgress.clamp(0.0, 1.0);
 
-    // Main green progress
-    final progressPaint = Paint()
+    // Gap angle between the two segments (used twice: once after each segment)
+    const gap = 0.02; // fraction of full circle per gap
+    final gapAngle = math.pi * 2 * gap;
+
+    // Each metric gets HALF the circle as its max allocation (minus the two gaps)
+    final segmentMax = (math.pi * 2 - gapAngle * 2) / 2;
+
+    // =========================
+    // Steps — fills its own half based on progress
+    // =========================
+    final stepsPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
+      ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round
       ..color = AppColors.steps;
-    ;
 
-    canvas.drawArc(rect, -math.pi / 2, math.pi * 2 * progress, false, progressPaint);
+    final stepsStart = -math.pi / 2;
+    final stepsSweep = segmentMax * steps;
 
-    // Purple accent
-    final purplePaint = Paint()
+    canvas.drawArc(rect, stepsStart, stepsSweep, false, stepsPaint);
+
+    // =========================
+    // Workout — starts after steps' full allocation + gap, fills its own half
+    // =========================
+    final workoutPaint = Paint()
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 12
-      ..strokeCap = StrokeCap.butt
+      ..strokeWidth = strokeWidth
+      ..strokeCap = StrokeCap.round
       ..color = AppColors.workout;
 
-    // Small purple segment
-    canvas.drawArc(rect, math.pi * 0.62, math.pi * 0.18, false, purplePaint);
+    final workoutStart = stepsStart + segmentMax + gapAngle;
+    final workoutSweep = segmentMax * workout;
 
-    canvas.drawArc(rect, math.pi * 0.92, math.pi * 0.10, false, purplePaint);
+    canvas.drawArc(rect, workoutStart, workoutSweep, false, workoutPaint);
   }
 
   @override
-  bool shouldRepaint(covariant _ProgressPainter oldDelegate) {
-    return oldDelegate.progress != progress;
+  bool shouldRepaint(
+      covariant _ProgressPainter oldDelegate,
+      ) {
+    return oldDelegate.stepsProgress != stepsProgress ||
+        oldDelegate.workoutProgress != workoutProgress ||
+        oldDelegate.isDark != isDark;
   }
 }
-
 class _FitnessCard extends StatelessWidget {
   const _FitnessCard({
     required this.icon,

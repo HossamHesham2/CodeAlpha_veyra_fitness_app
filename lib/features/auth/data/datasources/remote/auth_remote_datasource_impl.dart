@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:veyra/core/constants/app_constants.dart';
 import 'package:veyra/core/exceptions/auth_exceptions.dart';
 import 'package:veyra/features/auth/data/datasources/remote/auth_remote_datasource.dart';
 import 'package:veyra/features/auth/data/models/user_model.dart';
@@ -42,7 +43,7 @@ class AuthRemoteDatasourceImpl extends AuthRemoteDatasource {
       await user.reload();
       final userModel = UserModel(fullName: fullName.trim(), email: email.trim());
 
-      await firestore.collection('users').doc(user.uid).set(userModel.toJson());
+      await firestore.collection(AppConstants.usersCollection).doc(user.uid).set(userModel.toJson());
     } on FirebaseAuthException catch (e) {
       throw _mapFirebaseAuthException(e);
     } on FirebaseException catch (_) {

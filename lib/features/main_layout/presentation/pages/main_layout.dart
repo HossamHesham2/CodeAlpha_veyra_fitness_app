@@ -1,11 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:veyra/core/constants/app_assets.dart';
+import 'package:veyra/core/di/injection.dart';
 import 'package:veyra/core/router/route_names.dart';
 import 'package:veyra/core/theme/app_colors.dart';
 import 'package:veyra/core/widgets/d_scaffold.dart';
+import 'package:veyra/features/home/presentation/bloc/home_bloc.dart';
+import 'package:veyra/features/home/presentation/bloc/home_event.dart';
 
 class MainLayout extends StatelessWidget {
   final StatefulNavigationShell navigationShell;
@@ -20,16 +24,33 @@ class MainLayout extends StatelessWidget {
   Widget build(BuildContext context) {
     final cs = Theme.of(context).colorScheme;
 
-    return DScaffold(
-      extendBody: true,
-      floatingActionButton: _FitnessFab(cs: cs, onTap: () => context.push(RouteNames.addActivity)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
-      bottomNavigationBar: _FloatingNavBar(
-        currentIndex: navigationShell.currentIndex,
-        onDestinationSelected: _onDestinationSelected,
-        cs: cs,
+    return BlocProvider(
+      create: (context) => getIt<HomeBloc>()..add(GetActivitiesEvent()),
+      child: Builder(
+        builder: (context) {
+          return DScaffold(
+            extendBody: true,
+            floatingActionButton: _FitnessFab(
+              cs: cs,
+              onTap: () async {
+                final result = await context.push<bool>(RouteNames.addActivity);
+                if (result == true && context.mounted) {
+                  print('REFRESH HOME');
+
+                  context.read<HomeBloc>().add(GetActivitiesEvent());
+                }
+              },
+            ),
+            floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
+            bottomNavigationBar: _FloatingNavBar(
+              currentIndex: navigationShell.currentIndex,
+              onDestinationSelected: _onDestinationSelected,
+              cs: cs,
+            ),
+            body: navigationShell,
+          );
+        },
       ),
-      body: navigationShell,
     );
   }
 }
