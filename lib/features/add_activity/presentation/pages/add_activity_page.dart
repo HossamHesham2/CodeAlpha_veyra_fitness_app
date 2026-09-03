@@ -16,8 +16,7 @@ import 'package:veyra/features/add_activity/presentation/bloc/add_activity_state
 import 'package:veyra/features/add_activity/presentation/widgets/exercise_type_dropdown.dart';
 import 'package:veyra/features/add_activity/presentation/widgets/intensity_selector.dart';
 import 'package:veyra/features/add_activity/presentation/widgets/labeled_text_field.dart';
-import 'package:veyra/features/home/presentation/bloc/home_bloc.dart';
-import 'package:veyra/features/home/presentation/bloc/home_event.dart';
+
 
 class AddActivityPage extends StatefulWidget {
   const AddActivityPage({super.key});

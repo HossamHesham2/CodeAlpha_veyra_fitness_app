@@ -47,7 +47,6 @@ class PrimaryButton extends StatelessWidget {
         onPressed: enabled && !isLoading ? onPressed : null,
         style: ElevatedButton.styleFrom(
           backgroundColor: backgroundColor ?? theme.colorScheme.primary,
-          foregroundColor: theme.colorScheme.onPrimary,
           disabledBackgroundColor: theme.colorScheme.primary.withValues(alpha: 0.5),
           disabledForegroundColor: theme.colorScheme.onPrimary.withValues(alpha: 0.7),
           elevation: 0,
@@ -70,7 +69,7 @@ class PrimaryButton extends StatelessWidget {
                         textStyle ??
                         theme.textTheme.bodyLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: theme.colorScheme.onPrimary,
+                          color: foregroundColor ?? theme.colorScheme.onPrimary,
                         ),
                   ),
       ),

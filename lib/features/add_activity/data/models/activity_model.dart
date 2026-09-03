@@ -1,4 +1,7 @@
+import 'package:uuid/uuid.dart';
+
 class ActivityModel {
+  final String id;
   final String? exerciseType;
   final String? duration;
   final String? caloriesBurned;
@@ -9,6 +12,7 @@ class ActivityModel {
   final String? notes;
 
   ActivityModel({
+    String? id,
     this.exerciseType,
     this.duration,
     this.caloriesBurned,
@@ -17,10 +21,11 @@ class ActivityModel {
     this.time,
     this.intensity,
     this.notes,
-  });
+  }) : id = id ?? const Uuid().v4();
 
   factory ActivityModel.fromJson(Map<String, dynamic> json) {
     return ActivityModel(
+      id: json['id'] as String?,
       exerciseType: json['exerciseType'] as String?,
       duration: json['duration'] as String?,
       caloriesBurned: json['caloriesBurned'] as String?,
@@ -34,6 +39,7 @@ class ActivityModel {
 
   Map<String, dynamic> toJson() {
     return {
+      'id': id,
       if (exerciseType != null) 'exerciseType': exerciseType,
       if (duration != null) 'duration': duration,
       if (caloriesBurned != null) 'caloriesBurned': caloriesBurned,

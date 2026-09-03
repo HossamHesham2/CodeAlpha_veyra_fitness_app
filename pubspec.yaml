@@ -49,6 +49,7 @@ dependencies:
   flutter_svg: ^2.3.0
   intl: ^0.20.3
   flutter_launcher_icons: ^0.14.4
+  uuid: ^4.6.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

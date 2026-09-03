@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:veyra/core/router/route_names.dart';
+import 'package:veyra/features/activity_details/presentation/pages/activity_details_page.dart';
+import 'package:veyra/features/add_activity/data/models/activity_model.dart';
 import 'package:veyra/features/add_activity/presentation/pages/add_activity_page.dart';
 import 'package:veyra/features/auth/presentation/pages/auth_page.dart';
 import 'package:veyra/features/history/presentation/pages/history_page.dart';
@@ -37,6 +39,14 @@ class AppRouter {
         path: RouteNames.addActivity,
         name: RouteNames.addActivity,
         builder: (context, state) => const AddActivityPage(),
+      ),
+      GoRoute(
+        path: RouteNames.activityDetails,
+        name: RouteNames.activityDetails,
+        builder: (context, state) {
+          final activityModel = state.extra as ActivityModel;
+          return ActivityDetailsPage(activityModel: activityModel);
+        },
       ),
       StatefulShellRoute.indexedStack(
         builder: (context, state, navigationShell) => MainLayout(navigationShell: navigationShell),

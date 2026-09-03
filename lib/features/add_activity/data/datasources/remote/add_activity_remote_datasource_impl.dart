@@ -18,11 +18,13 @@ class AddActivityRemoteDatasourceImpl extends AddActivityRemoteDatasource {
       if (user == null) {
         throw const RemoteException(message: 'User is not authenticated');
       }
-      await firestore
+      final activityRef = firestore
           .collection(AppConstants.usersCollection)
           .doc(user.uid)
           .collection(AppConstants.activitiesCollection)
-          .add(activityModel.toJson());
+          .doc(activityModel.id);
+
+      await activityRef.set(activityModel.toJson());
     } on FirebaseException catch (e) {
       throw RemoteException.fromFirebaseException(e);
     } on RemoteException {

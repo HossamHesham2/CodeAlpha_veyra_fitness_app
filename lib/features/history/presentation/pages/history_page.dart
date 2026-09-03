@@ -4,12 +4,14 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:veyra/core/constants/app_enums.dart';
+import 'package:veyra/core/models/activity_style_model.dart';
 import 'package:veyra/core/router/route_names.dart';
 import 'package:veyra/core/theme/app_colors.dart';
 import 'package:veyra/core/utils/app_spacing.dart';
 import 'package:veyra/core/widgets/activity_item.dart';
 import 'package:veyra/core/widgets/d_scaffold.dart';
 import 'package:veyra/features/home/presentation/bloc/home_bloc.dart';
+import 'package:veyra/features/home/presentation/bloc/home_event.dart';
 import 'package:veyra/features/home/presentation/bloc/home_state.dart';
 
 class HistoryPage extends StatelessWidget {
@@ -64,7 +66,7 @@ class HistoryPage extends StatelessWidget {
                     onPressed: () {
                       context.go(RouteNames.home);
                     },
-                    icon: Icon(Icons.arrow_back_ios,size: 18.sp,),
+                    icon: Icon(Icons.arrow_back_ios, size: 18.sp),
                   ),
                   SizedBox(width: AppSpacing.gapH4),
 
@@ -112,7 +114,7 @@ class _HistoryDaySection extends StatelessWidget {
         ...activities.asMap().entries.map((entry) {
           final activity = entry.value;
 
-          final activityStyle = _getActivityStyle(activity.exerciseType);
+          final activityStyle = ActivityStyleModel.getActivityStyle(activity.exerciseType);
 
           return Padding(
             padding: EdgeInsets.only(
@@ -123,6 +125,13 @@ class _HistoryDaySection extends StatelessWidget {
               duration: "${activity.duration ?? '0'} min",
               calories: "${activity.caloriesBurned ?? '0'} cal",
               time: activity.time ?? '',
+              onTap: () async {
+                final result = await context.push(RouteNames.activityDetails, extra: activity);
+
+                if (result == true && context.mounted) {
+                  context.read<HomeBloc>().add(GetActivitiesEvent());
+                }
+              },
               icon: activityStyle.icon,
               color: activityStyle.color,
             ),
@@ -176,49 +185,5 @@ class _DateHeader extends StatelessWidget {
         color: Theme.of(context).colorScheme.onSurface,
       ),
     );
-  }
-}
-
-class _ActivityStyle {
-  const _ActivityStyle({required this.icon, required this.color});
-
-  final IconData icon;
-  final Color color;
-}
-
-_ActivityStyle _getActivityStyle(String? exerciseType) {
-  final type = exerciseType?.toLowerCase().trim();
-
-  switch (type) {
-    case 'walking':
-    case 'steps':
-      return const _ActivityStyle(icon: Icons.directions_walk_rounded, color: AppColors.steps);
-
-    case 'running':
-    case 'run':
-      return const _ActivityStyle(icon: Icons.directions_run_rounded, color: AppColors.workout);
-
-    case 'cycling':
-    case 'bike':
-      return const _ActivityStyle(icon: Icons.directions_bike_rounded, color: AppColors.steps);
-
-    case 'weight':
-    case 'weight lifting':
-    case 'weightlifting':
-    case 'strength':
-      return const _ActivityStyle(icon: Icons.fitness_center_rounded, color: AppColors.weight);
-
-    case 'heart rate':
-    case 'heart':
-      return const _ActivityStyle(icon: Icons.favorite_rounded, color: AppColors.heartRate);
-
-    case 'calories':
-      return const _ActivityStyle(
-        icon: Icons.local_fire_department_rounded,
-        color: AppColors.calories,
-      );
-
-    default:
-      return const _ActivityStyle(icon: Icons.fitness_center_rounded, color: AppColors.workout);
   }
 }

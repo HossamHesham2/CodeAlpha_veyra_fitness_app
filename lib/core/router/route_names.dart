@@ -9,4 +9,5 @@ class RouteNames {
   static const String states = '/states';
   static const String profile = '/profile';
   static const String addActivity = '/addActivity';
+  static const String activityDetails = '/activityDetails';
 }

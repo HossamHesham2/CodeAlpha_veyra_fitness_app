@@ -1,6 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get_it/get_it.dart';
+import 'package:veyra/features/activity_details/data/datasources/remote/activity_details_remote_datasource.dart';
+import 'package:veyra/features/activity_details/data/datasources/remote/activity_details_remote_datasource_impl.dart';
+import 'package:veyra/features/activity_details/data/repositories/activity_details_repository_impl.dart';
+import 'package:veyra/features/activity_details/domain/repositories/activity_details_repository.dart';
+import 'package:veyra/features/activity_details/domain/usecases/delete_activity_use_case.dart';
+import 'package:veyra/features/activity_details/presentation/bloc/activity_details_bloc.dart';
 import 'package:veyra/features/add_activity/data/datasources/remote/add_activity_remote_datasource.dart';
 import 'package:veyra/features/add_activity/data/datasources/remote/add_activity_remote_datasource_impl.dart';
 import 'package:veyra/features/add_activity/data/repositories/add_activity_repository_impl.dart';
@@ -45,6 +51,12 @@ Future<void> configureDependency() async {
       firestore: getIt<FirebaseFirestore>(),
     ),
   );
+  getIt.registerLazySingleton<ActivityDetailsRemoteDatasource>(
+    () => ActivityDetailsRemoteDatasourceImpl(
+      firebaseAuth: getIt<FirebaseAuth>(),
+      firestore: getIt<FirebaseFirestore>(),
+    ),
+  );
   // Repositories
   getIt.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(authRemoteDatasource: getIt<AuthRemoteDatasource>()),
@@ -54,6 +66,11 @@ Future<void> configureDependency() async {
   );
   getIt.registerLazySingleton<HomeRepository>(
     () => HomeRepositoryImpl(homeRemoteDatasource: getIt<HomeRemoteDatasource>()),
+  );
+  getIt.registerLazySingleton<ActivityDetailsRepository>(
+    () => ActivityDetailsRepositoryImpl(
+      activityDetailsRemoteDatasource: getIt<ActivityDetailsRemoteDatasource>(),
+    ),
   );
   // UseCases
   getIt.registerLazySingleton<SignInUseCase>(
@@ -68,6 +85,9 @@ Future<void> configureDependency() async {
   getIt.registerLazySingleton<GetActivitiesUseCase>(
     () => GetActivitiesUseCase(homeRepository: getIt<HomeRepository>()),
   );
+  getIt.registerLazySingleton<DeleteActivityUseCase>(
+    () => DeleteActivityUseCase(activityDetailsRepository: getIt<ActivityDetailsRepository>()),
+  );
   // State Management
   getIt.registerFactory<AuthBloc>(
     () => AuthBloc(signInUseCase: getIt<SignInUseCase>(), signUpUseCase: getIt<SignUpUseCase>()),
@@ -77,5 +97,8 @@ Future<void> configureDependency() async {
   );
   getIt.registerFactory<HomeBloc>(
     () => HomeBloc(getActivitiesUseCase: getIt<GetActivitiesUseCase>()),
+  );
+  getIt.registerFactory<ActivityDetailsBloc>(
+    () => ActivityDetailsBloc(deleteActivityUseCase: getIt<DeleteActivityUseCase>()),
   );
 }

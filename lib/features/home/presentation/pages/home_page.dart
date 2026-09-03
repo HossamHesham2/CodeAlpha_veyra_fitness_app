@@ -5,6 +5,7 @@ import 'package:intl/intl.dart' show DateFormat;
 import 'package:veyra/core/constants/app_enums.dart';
 import 'package:veyra/core/di/injection.dart';
 import 'package:veyra/core/extensions/exercise_type_extension.dart';
+import 'package:veyra/core/models/activity_style_model.dart';
 import 'package:veyra/core/router/route_names.dart';
 import 'package:veyra/core/theme/app_colors.dart';
 import 'package:veyra/core/utils/app_spacing.dart';
@@ -126,80 +127,29 @@ class HomePage extends StatelessWidget {
                   Center(child: Text(state.failure?.errorMessage ?? 'Something went wrong')),
                 ] else
                   ...activities.take(5).map((activity) {
-                    IconData iconData() {
-                      switch (activity.exerciseType) {
-                        case 'running':
-                          return Icons.directions_run;
-
-                        case 'walking':
-                          return Icons.directions_walk;
-
-                        case 'cycling':
-                          return Icons.directions_bike;
-
-                        case 'swimming':
-                          return Icons.pool;
-
-                        case 'jumpRope':
-                          return Icons.sports;
-
-                        case 'hiking':
-                          return Icons.hiking;
-
-                        case 'strengthTraining':
-                          return Icons.fitness_center;
-
-                        case 'weightlifting':
-                          return Icons.fitness_center;
-
-                        case 'bodybuilding':
-                          return Icons.accessibility_new;
-
-                        case 'crossFit':
-                          return Icons.fitness_center;
-
-                        case 'yoga':
-                          return Icons.self_improvement;
-
-                        case 'pilates':
-                          return Icons.accessibility_new;
-
-                        case 'stretching':
-                          return Icons.self_improvement;
-
-                        case 'mobility':
-                          return Icons.accessibility_new;
-
-                        case 'football':
-                          return Icons.sports_soccer;
-
-                        case 'basketball':
-                          return Icons.sports_basketball;
-
-                        case 'tennis':
-                          return Icons.sports_tennis;
-
-                        case 'boxing':
-                          return Icons.sports_mma;
-
-                        case 'other':
-                          return Icons.more_horiz;
-                        default:
-                          return Icons.more_horiz;
-                      }
-                    }
+                    final activityStyle = ActivityStyleModel.getActivityStyle(
+                      activity.exerciseType,
+                    );
 
                     return ActivityItem(
-                      color: AppColors.steps,
-                      icon: iconData(),
+                      color: activityStyle.color,
+                      icon: activityStyle.icon,
                       title: capitalize(activity.exerciseType ?? ""),
                       duration: '${activity.duration ?? '0'} min',
+                      onTap: () async {
+                        final result = await context.push(
+                          RouteNames.activityDetails,
+                          extra: activity,
+                        );
 
+                        if (result == true && context.mounted) {
+                          context.read<HomeBloc>().add(GetActivitiesEvent());
+                        }
+                      },
                       time: activity.time ?? '',
                       calories: '${activity.caloriesBurned ?? '0'} cal',
                     );
                   }).toList(),
-
               ],
             ),
           ),
